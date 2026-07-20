@@ -78,7 +78,7 @@ jobs:
         shell: bash
         run: |
           cd build
-          cpack -G "ZIP;MSI" -C ${{ steps.version.outputs.build_type }}
+          cpack -G "ZIP;WIX" -C ${{ steps.version.outputs.build_type }}
           VERSION="${{ steps.version.outputs.version }}"
           for f in *.msi; do mv "$f" "KeePassXC-${VERSION}-win64.msi"; done
           for f in *.zip; do mv "$f" "KeePassXC-${VERSION}-win64.zip"; done
