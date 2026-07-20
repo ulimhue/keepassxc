@@ -1,0 +1,95 @@
+name: Build Windows
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: '构建类型'
+        required: false
+        default: 'Release'
+        type: choice
+        options:
+          - Release
+          - Snapshot
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version from tag
+        id: version
+        shell: bash
+        run: |
+          TAG=$(git tag --points-at HEAD | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
+          if [ -n "$TAG" ]; then
+            echo "version=$TAG" >> $GITHUB_OUTPUT
+            echo "build_type=Release" >> $GITHUB_OUTPUT
+          else
+            LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")
+            SHORT_SHA=$(git rev-parse --short=7 HEAD)
+            echo "version=${LAST_TAG}-snapshot+${SHORT_SHA}" >> $GITHUB_OUTPUT
+            echo "build_type=${{ github.event.inputs.build_type || 'Snapshot' }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Setup vcpkg
+        id: vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgGitCommitId: '66c0373dc7fca549e5803087b9487edfe3aca0a1'
+
+      - name: Install vcpkg dependencies
+        run: |
+          vcpkg install --triplet x64-windows botan minizip libqrencode readline zlib argon2
+
+      - name: Setup Qt6
+        id: setup-qt
+        uses: jurplel/setup-qt@v3
+        with:
+          version: '6.6.3'
+          modules: 'qtsvg'
+
+      - name: Configure CMake
+        run: |
+          cmake -B build -S . `
+            -G Ninja `
+            -DCMAKE_BUILD_TYPE=${{ steps.version.outputs.build_type }} `
+            -DCMAKE_TOOLCHAIN_FILE=${{ steps.vcpkg.outputs.vcpkg-root }}/scripts/buildsystems/vcpkg.cmake `
+            -DVCPKG_TARGET_TRIPLET=x64-windows `
+            -DCMAKE_PREFIX_PATH=${{ steps.setup-qt.outputs.qt-path }} `
+            -DWITH_XC_ALL=ON `
+            -DWITH_TESTS=OFF `
+            -DKPXC_FEATURE_DOCS=OFF `
+            -DKEEPASSXC_BUILD_TYPE=${{ steps.version.outputs.build_type }}
+
+      - name: Build
+        run: cmake --build build --config ${{ steps.version.outputs.build_type }}
+
+      - name: Package
+        shell: bash
+        run: |
+          cd build
+          cpack -G "ZIP;MSI" -C ${{ steps.version.outputs.build_type }}
+          VERSION="${{ steps.version.outputs.version }}"
+          for f in *.msi; do mv "$f" "KeePassXC-${VERSION}-win64.msi"; done
+          for f in *.zip; do mv "$f" "KeePassXC-${VERSION}-win64.zip"; done
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: KeePassXC-${{ steps.version.outputs.version }}-win64
+          path: |
+            build/KeePassXC-${{ steps.version.outputs.version }}-win64.msi
+            build/KeePassXC-${{ steps.version.outputs.version }}-win64.zip
+          retention-days: 30
