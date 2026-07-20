@@ -582,6 +582,15 @@ if(WIN32)
 
             install(FILES ${OPENSSL_DLL} ${CRYPTO_DLL} DESTINATION ".")
         endif()
+    else()
+        # Deploy vcpkg third-party DLLs to install directory
+        if(VCPKG_INSTALLED_DIR AND VCPKG_TARGET_TRIPLET)
+            set(_VCPKG_BIN_DIR "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin")
+            file(GLOB _VCPKG_DLLS "${_VCPKG_BIN_DIR}/*.dll")
+            if(_VCPKG_DLLS)
+                install(FILES ${_VCPKG_DLLS} DESTINATION "." COMPONENT Runtime)
+            endif()
+        endif()
     endif()
 
     # install CA cert chains
