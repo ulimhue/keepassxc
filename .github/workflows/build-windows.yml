@@ -59,10 +59,9 @@ jobs:
           version: '6.6.3'
 
       - name: Pin CMake version (fix WiX incompatibility with CMake 3.30+)
-        shell: bash
-        run: |
-          choco install cmake --version=3.29.7 --install-dir="C:/Program Files/CMake" --force -y
-          echo "C:/Program Files/CMake/bin" >> $GITHUB_PATH
+        uses: jwlawson/setup-cmake@v2
+        with:
+          cmake-version: '3.29.7'
 
       - name: Configure CMake
         run: |
