@@ -55,7 +55,7 @@ jobs:
 
       - name: Setup Qt6
         id: setup-qt
-        uses: jurplel/setup-qt@v3
+        uses: jurplel/install-qt-action@v4
         with:
           version: '6.6.3'
           modules: 'qtsvg'
