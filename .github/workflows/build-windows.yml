@@ -52,10 +52,6 @@ jobs:
           ./bootstrap-vcpkg.bat -disableMetrics
           echo "$RUNNER_TEMP/vcpkg" >> "$GITHUB_PATH"
 
-      - name: Install vcpkg dependencies
-        run: |
-          vcpkg install --triplet x64-windows botan minizip libqrencode readline zlib argon2
-
       - name: Setup Qt6
         id: setup-qt
         uses: jurplel/install-qt-action@v4

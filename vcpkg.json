@@ -8,6 +8,7 @@
     "libqrencode",
     "readline",
     "zlib",
+    "argon2",
     {
       "name": "libusb",
       "platform": "linux | freebsd"
