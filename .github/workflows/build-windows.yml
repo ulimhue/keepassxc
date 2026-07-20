@@ -43,20 +43,38 @@ jobs:
         with:
           arch: x64
 
+      - name: Cache vcpkg binary packages
+        id: cache-vcpkg
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/vcpkg-binary-cache
+          key: vcpkg-binary-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt') }}
+          restore-keys: |
+            vcpkg-binary-${{ runner.os }}-
+
       - name: Setup vcpkg
         shell: bash
         run: |
+          mkdir -p "$RUNNER_TEMP/vcpkg-binary-cache"
           git clone https://github.com/microsoft/vcpkg.git "$RUNNER_TEMP/vcpkg"
           cd "$RUNNER_TEMP/vcpkg"
           git checkout 66c0373dc7fca549e5803087b9487edfe3aca0a1
           ./bootstrap-vcpkg.bat -disableMetrics
           echo "$RUNNER_TEMP/vcpkg" >> "$GITHUB_PATH"
 
+      - name: Cache Qt6
+        id: cache-qt
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/Qt
+          key: qt-${{ runner.os }}-6.6.3
+
       - name: Setup Qt6
         id: setup-qt
         uses: jurplel/install-qt-action@v4
         with:
           version: '6.6.3'
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
 
       - name: Setup CMake
         uses: jwlawson/actions-setup-cmake@v2
@@ -64,6 +82,8 @@ jobs:
           cmake-version: '3.29.7'
 
       - name: Configure CMake
+        env:
+          VCPKG_DEFAULT_BINARY_CACHE: ${{ runner.temp }}/vcpkg-binary-cache
         run: |
           cmake -B build -S . `
             -G Ninja `
