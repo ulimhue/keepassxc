@@ -59,7 +59,7 @@ jobs:
           version: '6.6.3'
 
       - name: Pin CMake version (fix WiX incompatibility with CMake 3.30+)
-        uses: jwlawson/setup-cmake@v2
+        uses: jwlawson/actions-setup-cmake@v2
         with:
           cmake-version: '3.29.7'
 
