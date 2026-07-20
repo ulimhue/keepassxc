@@ -44,10 +44,13 @@ jobs:
           arch: x64
 
       - name: Setup vcpkg
-        id: vcpkg
-        uses: lukka/run-vcpkg@v11
-        with:
-          vcpkgGitCommitId: '66c0373dc7fca549e5803087b9487edfe3aca0a1'
+        shell: bash
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git "$GITHUB_WORKSPACE/vcpkg"
+          cd "$GITHUB_WORKSPACE/vcpkg"
+          git checkout 66c0373dc7fca549e5803087b9487edfe3aca0a1
+          ./bootstrap-vcpkg.bat -disableMetrics
+          echo "$GITHUB_WORKSPACE/vcpkg" >> "$GITHUB_PATH"
 
       - name: Install vcpkg dependencies
         run: |
@@ -65,7 +68,7 @@ jobs:
           cmake -B build -S . `
             -G Ninja `
             -DCMAKE_BUILD_TYPE=${{ steps.version.outputs.build_type }} `
-            -DCMAKE_TOOLCHAIN_FILE=${{ steps.vcpkg.outputs.vcpkg-root }}/scripts/buildsystems/vcpkg.cmake `
+            -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake `
             -DVCPKG_TARGET_TRIPLET=x64-windows `
             -DCMAKE_PREFIX_PATH=${{ steps.setup-qt.outputs.qt-path }} `
             -DWITH_XC_ALL=ON `
