@@ -72,14 +72,6 @@
                             Name="KeePassXC"
                             Target="[#CM_FP_KeePassXC.exe]"
                             WorkingDirectory="INSTALL_ROOT"/>
-                        <Shortcut Id="GettingStartedShortcut"
-                            Name="KeePassXC - Getting Started"
-                            Target="[#CM_FP_share.docs.KeePassXC_GettingStarted.html]"
-                            WorkingDirectory="INSTALL_ROOT" />
-                        <Shortcut Id="UserGuideShortcut"
-                            Name="KeePassXC - User Guide"
-                            Target="[#CM_FP_share.docs.KeePassXC_UserGuide.html]"
-                            WorkingDirectory="INSTALL_ROOT" />
                         <RemoveFile Id="RemoveShortcuts" Name="*.*" On="uninstall" />
                         <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall" />
                         <RegistryValue Root="HKCU" Key="Software\KeePassXC" Name="StartMenuShortcut" Type="integer" Value="1" KeyPath="yes"/>
