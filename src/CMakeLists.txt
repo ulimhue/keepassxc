@@ -531,6 +531,8 @@ if(WIN32)
             "${CMAKE_SOURCE_DIR}/share/windows/KPXC_ExitDlg.wxs")
     set(CPACK_WIX_PROPERTY_ARPURLINFOABOUT  "https://keepassxc.org")
     set(CPACK_WIX_EXTENSIONS "WixUtilExtension.dll")
+    set(CPACK_WIX_VERSION "3")
+    set(CPACK_WIX_CUSTOM_XMLNS "ui=http://schemas.microsoft.com/wix/UI")
     include(CPack)
 
     
