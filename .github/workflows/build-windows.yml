@@ -58,7 +58,7 @@ jobs:
         with:
           version: '6.6.3'
 
-      - name: Pin CMake version (fix WiX incompatibility with CMake 3.30+)
+      - name: Setup CMake
         uses: jwlawson/actions-setup-cmake@v2
         with:
           cmake-version: '3.29.7'
@@ -96,3 +96,12 @@ jobs:
             build/KeePassXC-${{ steps.version.outputs.version }}-win64.msi
             build/KeePassXC-${{ steps.version.outputs.version }}-win64.zip
           retention-days: 30
+
+      - name: Upload WiX log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wix-debug-logs
+          path: |
+            build/_CPack_Packages/win64/WIX/wix.log
+          retention-days: 5
